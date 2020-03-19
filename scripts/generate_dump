@@ -394,7 +394,7 @@ main() {
         local mst_dump_filename="/tmp/mstdump"
         local max_dump_count="3"
         for i in $(seq 1 $max_dump_count); do
-            ${CMD_PREFIX}/usr/bin/mstdump /dev/mst/mt*conf0 > "${mst_dump_filename}${i}"
+            ${CMD_PREFIX}/usr/bin/mstdump /dev/mst/mt*cr0 > "${mst_dump_filename}${i}"
             save_file "${mst_dump_filename}${i}" mstdump true
         done
     fi
