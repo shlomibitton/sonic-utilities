@@ -249,6 +249,55 @@ save_file() {
 }
 
 ###############################################################################
+# Create FW Trace and saves its output to the incrementally built tar.
+# Globals:
+#  LOGDIR
+#  BASE
+#  MKDIR
+#  TAR
+#  TARFILE
+#  DUMPDIR
+#  V
+#  RM
+# Arguments:
+#  filename: the filename to save the output as in $BASE/dump
+# Returns:
+#  None
+###############################################################################
+fwtrace() {
+	local filename=$1
+	local filepath="${LOGDIR}/$filename"
+	local tarpath="${BASE}/dump/$filename"
+	[ ! -d $LOGDIR ] && $MKDIR $V -p $LOGDIR
+
+	stdbuf -oL fwtrace -d /dev/mst/mt52100_pci_cr0 -i all --tracer_mode=FIFO -s | tee ${filepath} | 
+	while IFS= read -r line
+	do
+		if [[ $line == *"Reading new events..."* ]]
+		then
+            sleep 10 
+            local PID=$(ps aux | grep tracer_mode=FIFO -m 1 | awk '{print $2}')
+            while (($PID>0))
+            do
+                p_name=$(ps aux | grep tracer_mode=FIFO -m 1)
+                if [[ $p_name == *"grep"* ]]
+                then
+                    break
+                fi
+                kill -9 $PID
+                PID=$(ps aux | grep tracer_mode=FIFO -m 1 | awk '{print $2}')
+            done 
+            break
+		fi
+	done
+
+	($TAR $V -rhf $TARFILE -C $DUMPDIR "$tarpath" \
+		|| abort "${ERROR_TAR_FAILED}" "tar append operation failed. Aborting to prevent data loss.") \
+		&& $RM $V -rf "$filepath"
+}
+
+
+###############################################################################
 # find_files routine
 # Globals:
 #  SINCE_DATE: list files only newer than given date
@@ -329,6 +378,7 @@ main() {
         /proc/zoneinfo \
         || abort "${ERROR_PROCFS_SAVE_FAILED}" "Proc saving operation failed. Aborting for safety."
 
+    fw_trace "fwtrace"
     save_cmd "show version" "version"
     save_cmd "show platform summary" "platform.summary"
     save_cmd "show platform syseeprom" "platform.syseeprom"
