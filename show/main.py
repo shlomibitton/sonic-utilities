@@ -1047,7 +1047,12 @@ def psustatus(index, verbose):
 def ssdhealth(device, verbose, vendor):
     """Show SSD Health information"""
     if not device:
-        device = os.popen("lsblk -o NAME,TYPE -p | grep disk").readline().strip().split()[0]
+        device_list = os.popen("lsblk -o NAME,TYPE -p | grep disk").readlines()
+        for device_object in device_list:
+            if "nvme" in device_object:
+                device = device_object.strip().split()[0]
+        if not device:
+            device = os.popen("lsblk -o NAME,TYPE -p | grep disk").readline().strip().split()[0]
     cmd = "ssdutil -d " + device
     options = " -v" if verbose else ""
     options += " -e" if vendor else ""
