@@ -80,13 +80,13 @@ def get_bridge_port_id_2_port_id(db):
 
     return bridge_port_id_2_port_id
 
-def get_lag_name(member_name, app_db):
-    keys = app_db.keys(app_db.APPL_DB, 'LAG_MEMBER_TABLE:PortChannel*')
+def get_lag_by_member(member_name, app_db):
+    keys = app_db.keys(app_db.APPL_DB, 'LAG_MEMBER_TABLE:*')
     keys = [] if keys is None else keys
     for key in keys:
-        entry = key.split(":")
-        if entry[2] == member_name:
-            return entry[1]
+        _, lag_name, lag_member_name = key.split(":")
+        if lag_member_name == member_name:
+            return lag_name
     return None
 
 def get_map_port_id_2_iface_name(asic_db, app_db):
@@ -110,7 +110,7 @@ def get_map_port_id_2_iface_name(asic_db, app_db):
             continue
         member_id = value['SAI_LAG_MEMBER_ATTR_PORT_ID']
         member_name = port_id_2_iface[member_id]
-        lag_name = get_lag_name(member_name, app_db)
+        lag_name = get_lag_by_member(member_name, app_db)
         if lag_name is not None:
             port_id_2_iface[lag_id] = lag_name
 
