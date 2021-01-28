@@ -184,8 +184,8 @@ def generate_fdb_entries(filename):
 
     asic_db = swsssdk.SonicV2Connector(host='127.0.0.1')
     app_db = swsssdk.SonicV2Connector(host='127.0.0.1')
-    asic_db.connect(db.ASIC_DB, False)   # Make one attempt only
-    app_db.connect(db.APPL_DB, False)   # Make one attempt only
+    asic_db.connect(asic_db.ASIC_DB, False)   # Make one attempt only
+    app_db.connect(app_db.APPL_DB, False)   # Make one attempt only
 
     bridge_id_2_iface = get_map_bridge_port_id_2_iface_name(asic_db, app_db)
 
