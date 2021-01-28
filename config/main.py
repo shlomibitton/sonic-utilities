@@ -725,6 +725,7 @@ def _stop_services(config_db):
     # This list is order-dependent. Please add services in the order they should be stopped
     # on Mellanox platform pmon is stopped by syncd
     services_to_stop = [
+        'teamd',
         'telemetry',
         'restapi',
         'swss',
