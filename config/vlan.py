@@ -206,13 +206,18 @@ def add_vlan_dhcp_relay_destination(db, vid, dhcp_relay_destination_ip):
     if len(vlan) == 0:
         ctx.fail("{} doesn't exist".format(vlan_name))
 
-    dhcp_relay_dests = vlan.get('dhcp_servers', [])
+    if clicommon.ipaddress_type(dhcp_relay_destination_ip) == 4:
+        dhcp_servers = 'dhcp_servers'
+    else:
+        dhcp_servers = 'dhcpv6_servers'
+
+    dhcp_relay_dests = vlan.get(dhcp_servers, [])
     if dhcp_relay_destination_ip in dhcp_relay_dests:
         click.echo("{} is already a DHCP relay destination for {}".format(dhcp_relay_destination_ip, vlan_name))
         return
 
     dhcp_relay_dests.append(dhcp_relay_destination_ip)
-    vlan['dhcp_servers'] = dhcp_relay_dests
+    vlan[dhcp_servers] = dhcp_relay_dests
     db.cfgdb.set_entry('VLAN', vlan_name, vlan)
     click.echo("Added DHCP relay destination address {} to {}".format(dhcp_relay_destination_ip, vlan_name))
     try:
@@ -240,15 +245,20 @@ def del_vlan_dhcp_relay_destination(db, vid, dhcp_relay_destination_ip):
     if len(vlan) == 0:
         ctx.fail("{} doesn't exist".format(vlan_name))
 
-    dhcp_relay_dests = vlan.get('dhcp_servers', [])
+    if clicommon.ipaddress_type(dhcp_relay_destination_ip) == 4:
+        dhcp_servers = 'dhcp_servers'
+    else:
+        dhcp_servers = 'dhcpv6_servers'
+
+    dhcp_relay_dests = vlan.get(dhcp_servers, [])
     if not dhcp_relay_destination_ip in dhcp_relay_dests:
         ctx.fail("{} is not a DHCP relay destination for {}".format(dhcp_relay_destination_ip, vlan_name))
 
     dhcp_relay_dests.remove(dhcp_relay_destination_ip)
     if len(dhcp_relay_dests) == 0:
-        del vlan['dhcp_servers']
+        del vlan[dhcp_servers]
     else:
-        vlan['dhcp_servers'] = dhcp_relay_dests
+        vlan[dhcp_servers] = dhcp_relay_dests
     db.cfgdb.set_entry('VLAN', vlan_name, vlan)
     click.echo("Removed DHCP relay destination address {} from {}".format(dhcp_relay_destination_ip, vlan_name))
     try:

@@ -200,6 +200,16 @@ def is_ipaddress(val):
         return False
     return True
 
+def ipaddress_type(val):
+    """ Return the IP address type """
+    import netaddr
+    if not val:
+        return None
+    try:
+        ip_version = netaddr.IPAddress(str(val))
+    except netaddr.core.AddrFormatError:
+        return None
+    return ip_version.version
 
 def is_ip_prefix_in_key(key):
     '''
