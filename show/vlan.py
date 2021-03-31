@@ -32,11 +32,15 @@ def brief(db, verbose):
 
     # Parsing DHCP Helpers info
     for key in natsorted(list(vlan_dhcp_helper_data.keys())):
-        try:
-            if vlan_dhcp_helper_data[key]['dhcp_servers']:
-                vlan_dhcp_helper_dict[key.strip('Vlan')] = vlan_dhcp_helper_data[key]['dhcp_servers']
-        except KeyError:
-            vlan_dhcp_helper_dict[key.strip('Vlan')] = " "
+        vlan_dhcp_helper_dict[key.strip('Vlan')] = []
+
+        dhcp_servers = vlan_dhcp_helper_data[key]['dhcp_servers'] if 'dhcp_servers' in vlan_dhcp_helper_data[key].keys() else []
+        if dhcp_servers:
+            vlan_dhcp_helper_dict[key.strip('Vlan')] += dhcp_servers
+
+        dhcpv6_servers = vlan_dhcp_helper_data[key]['dhcpv6_servers'] if 'dhcpv6_servers' in vlan_dhcp_helper_data[key].keys() else []
+        if dhcpv6_servers:
+            vlan_dhcp_helper_dict[key.strip('Vlan')] += dhcpv6_servers
 
     # Parsing VLAN Gateway info
     for key in vlan_ip_data:
