@@ -111,22 +111,22 @@ Vlan4000   4000  PortChannel1001  tagged
 """
 
 config_vlan_add_dhcp_relay_output="""\
-Added DHCP relay destination address 192.0.0.100 to Vlan1000
+Added DHCP relay destination addresses ('192.0.0.100',) to Vlan1000
 Restarting DHCP relay service...
 """
 
 config_vlan_del_dhcp_relay_output="""\
-Removed DHCP relay destination address 192.0.0.100 from Vlan1000
+Removed DHCP relay destination addresses ('192.0.0.100',) from Vlan1000
 Restarting DHCP relay service...
 """
 
 config_vlan_add_dhcpv6_relay_output="""\
-Added DHCP relay destination address fc02:2000::1 to Vlan1000
+Added DHCP relay destination addresses ('fc02:2000::1',) to Vlan1000
 Restarting DHCP relay service...
 """
 
 config_vlan_del_dhcpv6_relay_output="""\
-Removed DHCP relay destination address fc02:2000::1 from Vlan1000
+Removed DHCP relay destination addresses ('fc02:2000::1',) from Vlan1000
 Restarting DHCP relay service...
 """
 
@@ -134,11 +134,11 @@ show_vlan_brief_output_with_new_dhcp_relay_address="""\
 +-----------+-----------------+-----------------+----------------+-----------------------+-------------+
 |   VLAN ID | IP Address      | Ports           | Port Tagging   | DHCP Helper Address   | Proxy ARP   |
 +===========+=================+=================+================+=======================+=============+
-|      1000 | 192.168.0.1/21  | Ethernet4       | untagged       | 192.0.0.1             | disabled    |
-|           | fc02:1000::1/64 | Ethernet8       | untagged       | 192.0.0.2             |             |
-|           |                 | Ethernet12      | untagged       | 192.0.0.3             |             |
-|           |                 | Ethernet16      | untagged       | 192.0.0.4             |             |
-|           |                 |                 |                | 192.0.0.100           |             |
+|      1000 | 192.168.0.1/21  | Ethernet4       | untagged       | 192.0.0.100           | disabled    |
+|           | fc02:1000::1/64 | Ethernet8       | untagged       | 192.0.0.1             |             |
+|           |                 | Ethernet12      | untagged       | 192.0.0.2             |             |
+|           |                 | Ethernet16      | untagged       | 192.0.0.3             |             |
+|           |                 |                 |                | 192.0.0.4             |             |
 +-----------+-----------------+-----------------+----------------+-----------------------+-------------+
 |      2000 | 192.168.0.10/21 | Ethernet24      | untagged       | 192.0.0.1             | enabled     |
 |           | fc02:1011::1/64 | Ethernet28      | untagged       | 192.0.0.2             |             |
