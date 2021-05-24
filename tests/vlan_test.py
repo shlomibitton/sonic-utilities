@@ -111,7 +111,7 @@ Vlan4000   4000  PortChannel1001  tagged
 """
 
 config_vlan_add_dhcp_relay_output="""\
-Added DHCP relay destination addresses ('192.0.0.100',) to Vlan1000
+Added DHCP relay destination addresses ['192.0.0.100'] to Vlan1000
 Restarting DHCP relay service...
 """
 
@@ -121,7 +121,12 @@ Restarting DHCP relay service...
 """
 
 config_vlan_add_dhcpv6_relay_output="""\
-Added DHCP relay destination addresses ('fc02:2000::1',) to Vlan1000
+Added DHCP relay destination addresses ['fc02:2000::1'] to Vlan1000
+Restarting DHCP relay service...
+"""
+
+config_vlan_add_multiple_dhcpv6_relay_output="""\
+Added DHCP relay destination addresses ['fc02:2000::1', 'fc02:2000::2', 'fc02:2000::3'] to Vlan1000
 Restarting DHCP relay service...
 """
 
@@ -130,15 +135,20 @@ Removed DHCP relay destination addresses ('fc02:2000::1',) from Vlan1000
 Restarting DHCP relay service...
 """
 
+config_vlan_del_multiple_dhcpv6_relay_output="""\
+Removed DHCP relay destination addresses ('fc02:2000::1', 'fc02:2000::2', 'fc02:2000::3') from Vlan1000
+Restarting DHCP relay service...
+"""
+
 show_vlan_brief_output_with_new_dhcp_relay_address="""\
 +-----------+-----------------+-----------------+----------------+-----------------------+-------------+
 |   VLAN ID | IP Address      | Ports           | Port Tagging   | DHCP Helper Address   | Proxy ARP   |
 +===========+=================+=================+================+=======================+=============+
-|      1000 | 192.168.0.1/21  | Ethernet4       | untagged       | 192.0.0.100           | disabled    |
-|           | fc02:1000::1/64 | Ethernet8       | untagged       | 192.0.0.1             |             |
-|           |                 | Ethernet12      | untagged       | 192.0.0.2             |             |
-|           |                 | Ethernet16      | untagged       | 192.0.0.3             |             |
-|           |                 |                 |                | 192.0.0.4             |             |
+|      1000 | 192.168.0.1/21  | Ethernet4       | untagged       | 192.0.0.1             | disabled    |
+|           | fc02:1000::1/64 | Ethernet8       | untagged       | 192.0.0.2             |             |
+|           |                 | Ethernet12      | untagged       | 192.0.0.3             |             |
+|           |                 | Ethernet16      | untagged       | 192.0.0.4             |             |
+|           |                 |                 |                | 192.0.0.100           |             |
 +-----------+-----------------+-----------------+----------------+-----------------------+-------------+
 |      2000 | 192.168.0.10/21 | Ethernet24      | untagged       | 192.0.0.1             | enabled     |
 |           | fc02:1011::1/64 | Ethernet28      | untagged       | 192.0.0.2             |             |
@@ -160,6 +170,29 @@ show_vlan_brief_output_with_new_dhcpv6_relay_address="""\
 |           |                 | Ethernet12      | untagged       | 192.0.0.3             |             |
 |           |                 | Ethernet16      | untagged       | 192.0.0.4             |             |
 |           |                 |                 |                | fc02:2000::1          |             |
++-----------+-----------------+-----------------+----------------+-----------------------+-------------+
+|      2000 | 192.168.0.10/21 | Ethernet24      | untagged       | 192.0.0.1             | enabled     |
+|           | fc02:1011::1/64 | Ethernet28      | untagged       | 192.0.0.2             |             |
+|           |                 |                 |                | 192.0.0.3             |             |
+|           |                 |                 |                | 192.0.0.4             |             |
++-----------+-----------------+-----------------+----------------+-----------------------+-------------+
+|      3000 |                 |                 |                |                       | disabled    |
++-----------+-----------------+-----------------+----------------+-----------------------+-------------+
+|      4000 |                 | PortChannel1001 | tagged         |                       | disabled    |
++-----------+-----------------+-----------------+----------------+-----------------------+-------------+
+"""
+
+show_vlan_brief_output_with_new_multiple_dhcpv6_relay_address="""\
++-----------+-----------------+-----------------+----------------+-----------------------+-------------+
+|   VLAN ID | IP Address      | Ports           | Port Tagging   | DHCP Helper Address   | Proxy ARP   |
++===========+=================+=================+================+=======================+=============+
+|      1000 | 192.168.0.1/21  | Ethernet4       | untagged       | 192.0.0.1             | disabled    |
+|           | fc02:1000::1/64 | Ethernet8       | untagged       | 192.0.0.2             |             |
+|           |                 | Ethernet12      | untagged       | 192.0.0.3             |             |
+|           |                 | Ethernet16      | untagged       | 192.0.0.4             |             |
+|           |                 |                 |                | fc02:2000::1          |             |
+|           |                 |                 |                | fc02:2000::2          |             |
+|           |                 |                 |                | fc02:2000::3          |             |
 +-----------+-----------------+-----------------+----------------+-----------------------+-------------+
 |      2000 | 192.168.0.10/21 | Ethernet24      | untagged       | 192.0.0.1             | enabled     |
 |           | fc02:1011::1/64 | Ethernet28      | untagged       | 192.0.0.2             |             |
@@ -567,6 +600,15 @@ class TestVlan(object):
             assert "Error: 192.0.0.1000 is invalid IP address" in result.output
             assert mock_run_command.call_count == 0
 
+            result = runner.invoke(config.config.commands["vlan"].commands["dhcp_relay"].commands["add"],
+                                   ["1000", "192.0.0."])
+            print(result.exit_code)
+            print(result.output)
+            # traceback.print_tb(result.exc_info[2])
+            assert result.exit_code != 0
+            assert "Error: 192.0.0. is invalid IP address" in result.output
+            assert mock_run_command.call_count == 0
+
     def test_config_vlan_add_dhcp_relay_with_exist_ip(self):
         runner = CliRunner()
 
@@ -641,6 +683,40 @@ class TestVlan(object):
             print(result.output)
             assert result.exit_code == 0
             assert result.output == config_vlan_del_dhcpv6_relay_output
+            assert mock_run_command.call_count == 3
+
+        # show output
+        result = runner.invoke(show.cli.commands["vlan"].commands["brief"], [], obj=db)
+        print(result.output)
+        assert result.output == show_vlan_brief_output
+
+    def test_config_vlan_add_del_multiple_dhcpv6_relay_dest(self):
+        runner = CliRunner()
+        db = Db()
+
+        # add new relay dest
+        with mock.patch("utilities_common.cli.run_command") as mock_run_command:
+            result = runner.invoke(config.config.commands["vlan"].commands["dhcp_relay"].commands["add"],
+                                   ["1000", "fc02:2000::1", "fc02:2000::2", "fc02:2000::3"], obj=db)
+            print(result.exit_code)
+            print(result.output)
+            assert result.exit_code == 0
+            assert result.output == config_vlan_add_multiple_dhcpv6_relay_output
+            assert mock_run_command.call_count == 3
+
+        # show output
+        result = runner.invoke(show.cli.commands["vlan"].commands["brief"], [], obj=db)
+        print(result.output)
+        assert result.output == show_vlan_brief_output_with_new_multiple_dhcpv6_relay_address
+
+        # del relay dest
+        with mock.patch("utilities_common.cli.run_command") as mock_run_command:
+            result = runner.invoke(config.config.commands["vlan"].commands["dhcp_relay"].commands["del"],
+                                   ["1000", "fc02:2000::1", "fc02:2000::2", "fc02:2000::3"], obj=db)
+            print(result.exit_code)
+            print(result.output)
+            assert result.exit_code == 0
+            assert result.output == config_vlan_del_multiple_dhcpv6_relay_output
             assert mock_run_command.call_count == 3
 
         # show output
